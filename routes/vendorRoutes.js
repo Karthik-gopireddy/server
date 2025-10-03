@@ -9,7 +9,7 @@ router.post("/register", createVendor);
 router.post("/login", Login);
 
 
-router.get("getVendorDetails",vendorDetails)
+router.get("/getVendorDetails",vendorDetails)
 
 
 

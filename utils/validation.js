@@ -38,11 +38,15 @@ export const adminLogin = (admin) => {
 
 export const vendorRegister = (vendor) => {
   const errorArray = [];
-  const { vendor_name, email, password, role } = vendor;
+  const { vendor_name, email, password,mobile, role } = vendor;
 
   if (!vendor_name) {
     errorArray.push("vendor name is required");
   }
+   if (!mobile) {
+    errorArray.push("Mobile Number is required");
+  }
+  
   if (!email) {
     errorArray.push("Email is required");
   }
@@ -77,12 +81,12 @@ export const vendorLogin = (vendor) => {
 export const createProductValidation = (product) => {
   const errorArray = [];
 
-  const { name, email, phone, address, price, image, Category } = product;
+  const { name, email, phone, address, price, image, category } = product;
 
   if (!name) {
     errorArray.push("Product name is required");
   }
-  if (!Category) {
+  if (!category) {
     errorArray.push("Category is required");
   }
 
@@ -112,9 +116,12 @@ export const createProductValidation = (product) => {
 export const userValidation = (user) => {
   const errorArray = [];
 
-  const { userName, email, password } = user;
+  const { userName, email, password,mobile } = user;
   if (!userName) {
     errorArray.push("User name is required");
+  }
+    if (!mobile) {
+    errorArray.push("Mobile number is required");
   }
   if (!email) {
     errorArray.push("Email is required");

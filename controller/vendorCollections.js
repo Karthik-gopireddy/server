@@ -9,10 +9,11 @@ import {
 } from "../utils/validation.js";
 import { roleType } from "../utils/roles.js";
 import Vendor from "../model/vendor.js";
+import Counter from "../model/Counter.js";
 
 export const createVendor = async (req, res, next) => {
   try {
-    const { vendor_name, email, password } = req.body;
+    const { vendor_name, email, mobile, password } = req.body;
 
     const validationError = vendorRegister(req.body);
 
@@ -31,9 +32,32 @@ export const createVendor = async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // const counter = await Counter.findOneAndUpdate(
+    //   { id: "vendorId" },
+    //   { $inc: { seq: 1 } },
+    //   { new: true, upsert: true }
+    // );
+
+    // const vendorId = `VD-${String(counter.seq).padStart(3, "0")}`;
+
+    const lastVendor = await Vendor.findOne().sort({ createdAt: -1 }).lean();
+
+    let newSeq = 1; // default if no vendors yet
+
+    if (lastVendor?.vendorId) {
+      // Extract the numeric part from vendorId e.g. "VD-005" → 5
+      const lastSeq = parseInt(lastVendor.vendorId.replace("VD-", ""), 10);
+      newSeq = lastSeq + 1;
+    }
+
+    // Step 2: Generate new vendorId
+    const vendorId = `VD-${String(newSeq).padStart(3, "0")}`;
     const vendor = await Vendor.create({
+      vendorId,
       vendor_name,
       email,
+      mobile,
       password: hashedPassword,
     });
 
@@ -49,8 +73,10 @@ export const createVendor = async (req, res, next) => {
       message: "Vendor created successfully",
       vendor: {
         _id: vendor._id,
+        vendorId: vendor.vendorId,
         vendor_name: vendor.vendor_name,
         email: vendor.email,
+        mobile: vendor.mobile,
         isVerified: vendor.isVerified,
         createdAt: vendor.createdAt,
       },
@@ -96,6 +122,7 @@ export const Login = async (req, res, next) => {
       token,
       vendor: {
         _id: vendor._id,
+        vendorId: vendor?.vendorId,
         vendor_name: vendor.vendor_name,
         email: vendor.email,
         isVerified: vendor.isVerified,
@@ -149,7 +176,7 @@ export const forgotPassword = async (req, res, next) => {
 
 export const vendorDetails = async (req, res, next) => {
   try {
-    const vendor = await Vendor.find();
+    const vendor = await Vendor.find({}).sort({ _id: -1 });
     if (!vendor) {
       return res.status(STATUSCODE.NO_DATA).json({ message: "No Data" });
     }
@@ -159,7 +186,6 @@ export const vendorDetails = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export const getSingleVendor = async (req, res, next) => {
   try {

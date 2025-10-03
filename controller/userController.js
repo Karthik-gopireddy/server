@@ -8,7 +8,7 @@ import { sendEmail } from "../middlewares/emailer.js";
 
 export const createUser = async (req, res, next) => {
   try {
-    const { userName, email, password } = req.body;
+    const { userName, email,mobile, password } = req.body;
 
     const validationError = userValidation(req.body);
     if (userValidation.errorArray) {
@@ -29,6 +29,7 @@ export const createUser = async (req, res, next) => {
     const user = await User.create({
       userName,
       email,
+      mobile,
       password: hashedPassword,
     });
     if (!user) {
@@ -91,6 +92,25 @@ export const userLogin = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getUser = async (req, res, next) => {
+  try {
+    
+    const users = await User.find({}).sort({ _id: -1 }) 
+
+    if (!users) {
+      return res.status(STATUSCODE.FAILURE).json({ message: "User not found" });
+    }
+
+    res
+      .status(STATUSCODE.SUCCESS)
+      .json({ message: "User fetched successfully", users });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 export const userForgotPassword = async (req, res, next) => {
   try {

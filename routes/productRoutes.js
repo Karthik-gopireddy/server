@@ -6,6 +6,9 @@ import {
   updateProduct,
   deleteProduct,
   getVendorProducts,
+  getAllapprovedProducts,
+  assignOrderToEmployee,
+  getEmployeeOrders,
 } from "../controller/productController.js";
 import { errorHandler } from "../middlewares/errorHandler.js";
 import upload from "../middlewares/upload.js";
@@ -21,27 +24,24 @@ router.get(
   getAllProducts
 );
 
-// router.post(
-//   "/createProduct",
-//   upload.single("image"),
-//   protect,
-//   access("ADMIN", "VENDOR"),
-//   createProduct
-// );
+router.get(
+  "/getAllapprovedProducts",
+  protect,
+  access("ADMIN", "VENDOR", "USER"),
+  getAllapprovedProducts
+);
 
 router.post(
   "/createProduct",
-  upload.fields([
-    { name: "images", maxCount: 20 }, 
-    { name: "videos", maxCount: 5 }  
-  ]),
   protect,
   access("ADMIN", "VENDOR"),
+  upload.fields([
+    { name: "images", maxCount: 20 },
+    { name: "videos", maxCount: 5 },
+  ]),
+
   createProduct
 );
-
-
-
 
 router.get(
   "/singleProduct/:id",
@@ -50,16 +50,20 @@ router.get(
   getSingleProduct
 );
 
-
 // GET /vendors/:vendorId/products
-router.get("/vendorProducts/:vendorId", getVendorProducts);
+router.get("/vendorProducts/:vendorId", protect, getVendorProducts);
+
+router.put("/assign", protect, access("ADMIN"), assignOrderToEmployee);
+
+router.get("/employee/orders", protect, access("EMPLOYEE"), getEmployeeOrders);
 
 router.post(
   "/updateProduct/:id",
   protect,
-  access("ADMIN", "VENDOR"),
+  access("ADMIN", "VENDOR","EMPLOYEE"),
   updateProduct
 );
+
 router.delete(
   "/deleteProduct/:id",
   protect,
